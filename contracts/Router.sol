@@ -35,7 +35,7 @@ contract Router is Ownable, SigVerify {
 
         require(sum == amount, "Router::routTokens: values sum != amount");
         require(isValidData(_msgSender(), address(token), send_type, recipients, values, amount, num, sig), "Router::routTokens: signature is invalid");
-        require(num == deduplication[_msgSender()], "Router::routTokens: deduplication fail");
+        require(num >= deduplication[_msgSender()], "Router::routTokens: deduplication fail");
 
         deduplication[_msgSender()] = num + 1;
         token.safeTransferFrom(msg.sender, address(this), amount);
