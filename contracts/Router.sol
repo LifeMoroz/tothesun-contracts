@@ -10,7 +10,7 @@ contract Router is Ownable, SigVerify {
         address indexed sender,
         IERC20 indexed token,
         uint256 indexed send_type,
-        address[] recipinets,
+        address[] recipients,
         uint256[] values,
         uint256 amount
     );
