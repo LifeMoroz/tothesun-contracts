@@ -10,46 +10,49 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 contract Trade is Context {
     using SafeERC20 for IERC20;
 
-    mapping(address => bool) public allowed_tokens;
-    IERC20Metadata public SUNT;
-    address private vault;
+    event Sold(
+        address indexed recipient,
+        IERC20 indexed acquire,
+        uint256 amount
+    );
 
-    constructor(IERC20Metadata _SUNT, address _vault) {
-        SUNT = _SUNT;
+    mapping(address => bool) public allowed_tokens;
+    IERC20Metadata public asset;
+    address public vault;
+
+    constructor(IERC20Metadata _asset, address _vault) {
+        asset = _asset;
         vault = _vault;
     }
 
-    function buy(IERC20 token, uint amount) external {
-        require(allowed_tokens[token], "TRADE::buy: token is not allowed");
+    function buy(IERC20 spend, uint amount) external {
+        require(allowed_tokens[spend], "TRADE::buy: token is not allowed");
         require(_msgSender() != vault, "TRADE::buy: caller can not be the vault");
-        token.safeTransferFrom(_msgSender(), vault, amount);
-        SUNT.safeTransferFrom(address(this), _msgSender(), sunt_amount);
+        spend.safeTransferFrom(_msgSender(), vault, amount);
+        asset.safeTransferFrom(address(this), _msgSender(), sunt_amount);
     }
 
-    function sellFrom(IERC20 token, address recipient, uint amount) external {
+    function sellFrom(IERC20 acquire, address recipient, uint amount) external {
         require(_msgSender() == vault, "TRADE::sellFrom: caller is not the vault");
         require(_msgSender() != recipient, "TRADE::sellFrom: recipient can not be the vault");
-        SUNT.safeTransferFrom(recipient, address(this), amount);
-        token.safeTransferFrom(vault, recipient, amount);
+        asset.safeTransferFrom(recipient, address(this), amount);
+        acquire.safeTransferFrom(vault, recipient, amount);
+        emit Sold(recipient, acquire, amount);
     }
 
     function setVault(address _vault) external OnlyOwner {
         vault = _vault;
     }
 
-    function getVault() public view returns (address) {
-        return vault;
-    }
-
-    function allow(IERC20Metadata token) external {
+    function allow(IERC20Metadata token) external OnlyOwner {
         require(
-            token.decimals() == SUNT.decimals(),
-            "TRADE::allow: decimals must be less or equal then SUNT.decimals()"
+            token.decimals() == asset.decimals(),
+            "TRADE::allow: decimals must be less or equal then asset.decimals()"
         );
         allowed_tokens[token] = true;
     }
 
-    function disallow(address token) external {
+    function disallow(address token) external OnlyOwner {
         allowed_tokens[token] = false;
     }
 }

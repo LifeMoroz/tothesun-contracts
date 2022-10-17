@@ -20,7 +20,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     await deployments.deploy('Router', {
         from: deployer,
         log: true,
-        args: [trade, sunt]
+        args: [trade]
     });
 };
 module.exports.tags = ['all'];

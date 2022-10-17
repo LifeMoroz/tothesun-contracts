@@ -4,8 +4,7 @@ pragma solidity 0.8.13;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./ECDSASignature.sol";
-import "./interfaces/ISUNT.sol";
-import "./interfaces/ITrade.sol";
+import "./interfaces/abcExchange.sol";
 
 
 contract Router is Ownable, SigVerify {
@@ -19,13 +18,11 @@ contract Router is Ownable, SigVerify {
     );
     using SafeERC20 for IERC20;
 
-    ITrade exchange;
-    ISUNT SUNT;
+    abcExchange exchange;
     mapping(address => uint256) public deduplication;
 
-    constructor(ITrade _exchange, ISUNT _SUNT) {
+    constructor(abcExchange _exchange) {
         exchange = _exchange;
-        SUNT = _SUNT;
     }
 
     function routTokens(
@@ -51,10 +48,10 @@ contract Router is Ownable, SigVerify {
         token.safeTransferFrom(_msgSender(), address(this), amount);
 
         for (uint i = 0; i < recipients.length; i++) {
-            if (recipients[i] == address(exchange.getVault())) { // Swap investment and return resulting tokens to msg.sender
+            if (recipients[i] == address(exchange.vault())) { // Swap investment and return resulting tokens to msg.sender
                 token.approve(address(exchange), values[0]);
                 exchange.buy(token, values[0]);
-                SUNT.safeTransfer(_msgSender(), values[0]);
+                exchange.asset().safeTransfer(_msgSender(), values[0]);
             } else {  // Referral program
                 token.safeTransfer(recipients[i], values[i]);
             }
