@@ -15,6 +15,10 @@ module.exports = {
     usdt: {
       // mainnet binance USDT
       56: "0x55d398326f99059fF775485246999027B3197955"
+    },
+    vault: {
+      // mainnet binance USDT
+      56: "0x533e6105E22Ada042769CF3463e2a169319f1535"
     }
   },
   solidity: {
