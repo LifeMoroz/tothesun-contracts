@@ -4,9 +4,8 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     let lock = await deployments.deploy('SUNT', {
         from: deployer,
         log: true,
-        args: [deployer.address]
+        args: [deployer, '10000000000000000000000000000']
     });
-    await lock.deployed();
     const sunt = lock.address;
 
     lock = await deployments.deploy('Trade', {
@@ -14,7 +13,6 @@ module.exports = async ({getNamedAccounts, deployments}) => {
         log: true,
         args: [sunt, vault]
     });
-    await lock.deployed();
     const trade = lock.address;
 
     await deployments.deploy('Router', {
