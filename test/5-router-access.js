@@ -1,7 +1,6 @@
 const chai = require("chai");
 const { ethers, deployments} = require("hardhat");
 const { solidity } = require("ethereum-waffle");
-const {tags} = require("../deploy/deploy-all");
 chai.use(solidity);
 const { expect } = chai;
 
