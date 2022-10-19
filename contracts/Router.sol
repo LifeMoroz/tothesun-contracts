@@ -20,7 +20,7 @@ contract Router is Ownable, SigVerify {
     );
 
 
-    abcExchange exchange;
+    abcExchange public exchange;
     mapping(address => uint256) public deduplication;
 
     constructor(abcExchange _exchange) {
@@ -50,9 +50,9 @@ contract Router is Ownable, SigVerify {
 
         for (uint i = 0; i < recipients.length; i++) {
             if (recipients[i] == address(exchange.vault())) { // Swap investment and return resulting tokens to msg.sender
-                token.approve(address(exchange), values[0]);
-                exchange.buy(token, values[0]);
-                exchange.asset().safeTransfer(_msgSender(), values[0]);
+                token.approve(address(exchange), values[i]);
+                exchange.buy(token, values[i]);
+                exchange.asset().safeTransfer(_msgSender(), values[i]);
             } else {  // Referral program
                 token.safeTransfer(recipients[i], values[i]);
             }
@@ -67,5 +67,9 @@ contract Router is Ownable, SigVerify {
             values,
             amount
         );
+    }
+
+    function setExchange(abcExchange _exchange) external onlyOwner{
+        exchange = _exchange;
     }
 }
