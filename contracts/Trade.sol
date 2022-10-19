@@ -16,16 +16,19 @@ contract Trade is Ownable {
         uint256 amount
     );
 
+    event Stop();
+
     mapping(address => bool) public allowed_tokens;
     ERC20 public asset;
     address public vault;
+    bool public suspend = false;
 
     constructor(ERC20 _asset, address _vault) {
         asset = _asset;
         vault = _vault;
     }
 
-    function buy(ERC20 spend, uint amount) external {
+    function buy(ERC20 spend, uint amount) external notSuspend {
         require(allowed_tokens[address(spend)], "TRADE::buy: token is not allowed");
         require(_msgSender() != vault, "TRADE::buy: caller can not be the vault");
         spend.safeTransferFrom(_msgSender(), vault, amount);
@@ -41,11 +44,21 @@ contract Trade is Ownable {
         emit Sold(recipient, acquire, amount);
     }
 
-    function setVault(address _vault) external onlyOwner {
+    function stop() external onlyOwner notSuspend {
+        suspend = true;
+        emit Stop();
+    }
+
+    function withdraw() external onlyOwner {
+        require(suspend, "TRADE::withdraw: contract is not suspend");
+        asset.safeTransfer(vault, asset.balanceOf(address(this)));
+    }
+
+    function setVault(address _vault) external onlyOwner notSuspend{
         vault = _vault;
     }
 
-    function allow(ERC20 token) external onlyOwner {
+    function allow(ERC20 token) external onlyOwner notSuspend{
         require(
             token.decimals() == asset.decimals(),
             "TRADE::allow: decimals must be less or equal then asset.decimals()"
@@ -53,7 +66,13 @@ contract Trade is Ownable {
         allowed_tokens[address(token)] = true;
     }
 
-    function disallow(address token) external onlyOwner {
+    function disallow(address token) external onlyOwner notSuspend{
         allowed_tokens[token] = false;
     }
+
+    modifier notSuspend() {
+        require(!suspend, "TRADE::notSuspend: contract is suspend");
+        _;
+    }
+
 }
