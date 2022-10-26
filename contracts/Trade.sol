@@ -40,7 +40,7 @@ contract Trade is Ownable {
         require(_msgSender() == vault, "TRADE::sellFrom: caller is not the vault");
         require(_msgSender() != recipient, "TRADE::sellFrom: recipient can not be the vault");
         asset.safeTransferFrom(recipient, address(this), amount);
-        acquire.safeTransferFrom(vault, recipient, amount);
+        acquire.safeTransferFrom(_msgSender(), recipient, amount);
         emit Sold(recipient, acquire, amount);
     }
 
