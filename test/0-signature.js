@@ -4,7 +4,7 @@ const { solidity } = require("ethereum-waffle");
 chai.use(solidity);
 const { expect } = chai;
 
-describe("TTS ecosystem test", function () {
+describe("TTS test signature", function () {
     let usdt, router, sunt, trade;
     let owner, vault, income, alice, bob, carl, eve;
     const types = ['address', 'address', 'uint256', 'address[]', 'uint256[]', 'uint256', 'uint256']
@@ -19,7 +19,7 @@ describe("TTS ecosystem test", function () {
         await usdt.deployed();
 
         const Sunt = await ethers.getContractFactory("SUNT");
-        sunt = await Sunt.deploy(owner.address, 1000000);
+        sunt = await Sunt.deploy();
         await sunt.deployed();
 
         const Trade = await ethers.getContractFactory("Trade");
@@ -32,10 +32,10 @@ describe("TTS ecosystem test", function () {
 
         // Set signer to owner
         await router.connect(owner).setSigner(owner.address);
+        await sunt.connect(owner).setTrader(trade.address);
 
         // send to alice
         await usdt.connect(owner).transfer(alice.address, 1000000);
-        await sunt.connect(owner).transfer(trade.address, 1000000);
 
         data = [usdt.address, 1, [income.address, eve.address], [400, 600], 1000, 0];
     });

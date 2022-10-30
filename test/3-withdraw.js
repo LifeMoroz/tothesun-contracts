@@ -4,7 +4,7 @@ const { solidity } = require("ethereum-waffle");
 chai.use(solidity);
 const { expect } = chai;
 
-describe("TTS ecosystem test", function () {
+describe("TTS check withdraw", function () {
     let usdt, router, sunt, trade;
     let owner, vault, income, alice, bob, carl, eve;
     const types = ['address', 'address', 'uint256', 'address[]', 'uint256[]', 'uint256', 'uint256']
@@ -19,7 +19,7 @@ describe("TTS ecosystem test", function () {
         await usdt.deployed();
 
         const Sunt = await ethers.getContractFactory("SUNT");
-        sunt = await Sunt.deploy(owner.address, 1000000);
+        sunt = await Sunt.deploy();
         await sunt.deployed();
 
         const Trade = await ethers.getContractFactory("Trade");
@@ -32,13 +32,13 @@ describe("TTS ecosystem test", function () {
 
         // Set signer to owner
         await router.connect(owner).setSigner(owner.address);
+        await sunt.connect(owner).setTrader(trade.address);
+
         // allow trade to take vault usdt
         await usdt.connect(vault).approve(trade.address, '115792089237316195423570985008687907853269984665640564039457584007913129639935');
 
         // send to alice
         await usdt.connect(owner).transfer(alice.address, 1100);
-        await sunt.connect(owner).transfer(trade.address, 1000);
-        await sunt.connect(alice).approve(trade.address, '115792089237316195423570985008687907853269984665640564039457584007913129639935');
 
         data = [usdt.address, 2, [vault.address, income.address, bob.address, eve.address], [1000, 40, 20, 40], 1100, 0];
     });
@@ -55,7 +55,6 @@ describe("TTS ecosystem test", function () {
         const alice_balance_sunt = await sunt.balanceOf(alice.address);
         const alice_balance_usdt = await usdt.balanceOf(alice.address);
         const vault_balance = await usdt.balanceOf(vault.address);
-        const trade_balance = await sunt.balanceOf(trade.address);
         const income_balance = await usdt.balanceOf(income.address);
         const bob_balance = await usdt.balanceOf(bob.address);
         const eve_balance = await usdt.balanceOf(eve.address);
@@ -63,7 +62,6 @@ describe("TTS ecosystem test", function () {
         expect(alice_balance_usdt.toString()).to.be.eq('1000')
         expect(alice_balance_sunt.toString()).to.be.eq('0')
         expect(vault_balance.toString()).to.be.eq('0');
-        expect(trade_balance.toString()).to.be.eq('1000');
         expect(income_balance.toString()).to.be.eq('40');
         expect(bob_balance.toString()).to.be.eq('20');
         expect(eve_balance.toString()).to.be.eq('40');
@@ -86,7 +84,6 @@ describe("TTS ecosystem test", function () {
 
     it("Check withdraw: illegal token", async () => {
         await usdt.connect(owner).transfer(alice.address, 1100);
-        await sunt.connect(owner).transfer(trade.address, 1000);
 
         await usdt.connect(alice).approve(router.address, 1100);
         let _data = Array.from(data);

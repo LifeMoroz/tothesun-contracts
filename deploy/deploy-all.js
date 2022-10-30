@@ -4,7 +4,6 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     let lock = await deployments.deploy('SUNT', {
         from: deployer,
         log: true,
-        args: [deployer, '10000000000000000000000000000']
     });
     const sunt = lock.address;
 

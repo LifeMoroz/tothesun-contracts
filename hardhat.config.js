@@ -17,6 +17,7 @@ module.exports = {
       56: "0x55d398326f99059fF775485246999027B3197955"
     },
     vault: {
+      default: 1,
       // mainnet binance USDT
       56: "0x533e6105E22Ada042769CF3463e2a169319f1535"
     }
